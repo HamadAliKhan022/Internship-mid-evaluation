@@ -5,8 +5,8 @@ import { useForm } from "react-hook-form";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 import AuthLayout from "../components/AuthLayout";
-import FormSelectField from "../components/FormSelectField";
-import FormTextField from "../components/FormTextField";
+import FormSelectField from "../components/forms/FormSelectField";
+import FormTextField from "../components/forms/FormTextField";
 import { auth, db } from "../firebase/firebase";
 
 function SignUpPage() {
@@ -16,16 +16,19 @@ function SignUpPage() {
     control,
     handleSubmit,
     watch,
+    trigger,
     setError,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting, errors }
   } = useForm({
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       name: "",
       email: "",
       password: "",
       confirmPassword: "",
-      role: "user",
-    },
+      role: "user"
+    }
   });
 
   const password = watch("password");
@@ -35,7 +38,7 @@ function SignUpPage() {
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         formData.email.trim(),
-        formData.password,
+        formData.password
       );
 
       const firebaseUser = userCredential.user;
@@ -45,7 +48,7 @@ function SignUpPage() {
         name: formData.name.trim(),
         email: formData.email.trim().toLowerCase(),
         role: formData.role,
-        createdAt: serverTimestamp(),
+        createdAt: serverTimestamp()
       });
 
       await signOut(auth);
@@ -53,8 +56,8 @@ function SignUpPage() {
       navigate("/signin", {
         replace: true,
         state: {
-          message: "Account created successfully. Please sign in.",
-        },
+          message: "Account created successfully. Please sign in."
+        }
       });
     } catch (error) {
       let message = "Unable to create your account. Please try again.";
@@ -83,18 +86,20 @@ function SignUpPage() {
           <FormTextField
             name="name"
             control={control}
+            trigger={trigger}
             label="Name"
             autoComplete="name"
             rules={{
               required: "Name is required.",
               validate: (value) =>
-                value.trim().length >= 2 || "Enter at least 2 characters.",
+                value.trim().length >= 2 || "Enter at least 2 characters."
             }}
           />
 
           <FormTextField
             name="email"
             control={control}
+            trigger={trigger}
             label="Email"
             type="email"
             autoComplete="email"
@@ -102,14 +107,15 @@ function SignUpPage() {
               required: "Email is required.",
               pattern: {
                 value: /^\S+@\S+\.\S+$/,
-                message: "Enter a valid email address.",
-              },
+                message: "Enter a valid email address."
+              }
             }}
           />
 
           <FormTextField
             name="password"
             control={control}
+            trigger={trigger}
             label="Password"
             type="password"
             autoComplete="new-password"
@@ -117,35 +123,37 @@ function SignUpPage() {
               required: "Password is required.",
               minLength: {
                 value: 6,
-                message: "Password must contain at least 6 characters.",
-              },
+                message: "Password must contain at least 6 characters."
+              }
             }}
           />
 
           <FormTextField
             name="confirmPassword"
             control={control}
+            trigger={trigger}
             label="Confirm Password"
             type="password"
             autoComplete="new-password"
             rules={{
               required: "Please confirm your password.",
               validate: (value) =>
-                value === password || "Passwords do not match.",
+                value === password || "Passwords do not match."
             }}
           />
 
           <FormSelectField
             name="role"
             control={control}
+            trigger={trigger}
             label="Role"
-            rules={{
-              required: "Please select a role.",
-            }}
             options={[
               { label: "User", value: "user" },
-              { label: "Admin", value: "admin" },
+              { label: "Admin", value: "admin" }
             ]}
+            rules={{
+              required: "Please select a role."
+            }}
           />
 
           <Button

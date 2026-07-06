@@ -2,10 +2,14 @@ import { Alert, Box, Button, Link, Typography } from "@mui/material";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { useForm } from "react-hook-form";
-import { Link as RouterLink, useLocation, useNavigate } from "react-router-dom";
+import {
+  Link as RouterLink,
+  useLocation,
+  useNavigate
+} from "react-router-dom";
 
 import AuthLayout from "../components/AuthLayout";
-import FormTextField from "../components/FormTextField";
+import FormTextField from "../components/forms/FormTextField";
 import { auth, db } from "../firebase/firebase";
 
 function SignInPage() {
@@ -15,13 +19,16 @@ function SignInPage() {
   const {
     control,
     handleSubmit,
+    trigger,
     setError,
-    formState: { isSubmitting, errors },
+    formState: { isSubmitting, errors }
   } = useForm({
+    mode: "onTouched",
+    reValidateMode: "onChange",
     defaultValues: {
       email: "",
-      password: "",
-    },
+      password: ""
+    }
   });
 
   const successMessage = location.state?.message;
@@ -31,18 +38,17 @@ function SignInPage() {
       const userCredential = await signInWithEmailAndPassword(
         auth,
         formData.email.trim(),
-        formData.password,
+        formData.password
       );
 
       const userDocument = await getDoc(
-        doc(db, "users", userCredential.user.uid),
+        doc(db, "users", userCredential.user.uid)
       );
 
       if (!userDocument.exists()) {
         await signOut(auth);
         setError("root", {
-          message:
-            "Your user profile could not be found. Please sign up again.",
+          message: "Your user profile could not be found. Please sign up again."
         });
         return;
       }
@@ -77,6 +83,7 @@ function SignInPage() {
           <FormTextField
             name="email"
             control={control}
+            trigger={trigger}
             label="Email"
             type="email"
             autoComplete="email"
@@ -84,19 +91,20 @@ function SignInPage() {
               required: "Email is required.",
               pattern: {
                 value: /^\S+@\S+\.\S+$/,
-                message: "Enter a valid email address.",
-              },
+                message: "Enter a valid email address."
+              }
             }}
           />
 
           <FormTextField
             name="password"
             control={control}
+            trigger={trigger}
             label="Password"
             type="password"
             autoComplete="current-password"
             rules={{
-              required: "Password is required.",
+              required: "Password is required."
             }}
           />
 
